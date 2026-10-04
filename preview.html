@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MMM-OverlayEffects - Interactive Preview</title>
+  <link rel="stylesheet" href="MMM-OverlayEffects.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #000;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Roboto", "Helvetica Neue", sans-serif;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Simulated MagicMirror UI modules */
+    .mock-mirror {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 30px 45px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .mock-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .mock-clock {
+      font-weight: 300;
+    }
+    .mock-clock .time {
+      font-size: 4rem;
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+    .mock-clock .date {
+      font-size: 1.2rem;
+      color: #aaa;
+      margin-top: 6px;
+    }
+    .mock-weather {
+      text-align: right;
+    }
+    .mock-weather .temp {
+      font-size: 3.5rem;
+      font-weight: 200;
+    }
+    .mock-weather .summary {
+      font-size: 1.1rem;
+      color: #bbb;
+    }
+    .mock-bottom {
+      text-align: center;
+      margin-bottom: 75px;
+    }
+    .mock-compliment {
+      font-size: 1.8rem;
+      font-weight: 300;
+      color: #eee;
+      letter-spacing: 0.5px;
+    }
+
+    /* Interactive preview control bar */
+    .preview-controls {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(28, 28, 30, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 30px;
+      padding: 10px 22px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 100000;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      pointer-events: auto;
+    }
+    .preview-controls label {
+      font-size: 0.85rem;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .preview-controls select, .preview-controls input {
+      background: #2c2c2e;
+      color: #fff;
+      border: 1px solid #48484a;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      outline: none;
+      cursor: pointer;
+    }
+    .preview-controls select:focus, .preview-controls input:focus {
+      border-color: #0a84ff;
+    }
+    .active-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #30d158;
+      color: #000;
+    }
+    .fps {
+      font-size: 0.75rem;
+      color: #aaa;
+      font-variant-numeric: tabular-nums;
+      min-width: 48px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Simulated MagicMirror Background UI -->
+  <div class="mock-mirror">
+    <div class="mock-top">
+      <div class="mock-clock">
+        <div class="time" id="mock-time">10:42<span style="font-size: 1.8rem; color: #888;"> 28</span></div>
+        <div class="date" id="mock-date">Friday, October 2, 2026</div>
+      </div>
+      <div class="mock-weather">
+        <div class="temp">64°F ⛅</div>
+        <div class="summary">Partly Cloudy</div>
+      </div>
+    </div>
+    <div class="mock-bottom">
+      <div class="mock-compliment">"Have a marvelous and productive day!"</div>
+    </div>
+  </div>
+
+  <!-- Target Container for MMM-OverlayEffects -->
+  <div id="module-container"></div>
+
+  <!-- Interactive Preview Controls -->
+  <div class="preview-controls">
+    <label for="effect-select">Effect:</label>
+    <select id="effect-select">
+      <option value="auto">Auto (Today's Date)</option>
+      <option value="spiderwebs">October: Spider Webs 🕸️</option>
+      <option value="snow">December: Snow ❄️</option>
+      <option value="fireworks">July 1-4: Fireworks 🎆</option>
+      <option value="hearts">Feb 14: Hearts & Heart Eyes 😍</option>
+      <option value="confetti">New Year: Confetti 🎉</option>
+      <option value="clovers">St. Patrick's: Clovers ☘️🍀</option>
+      <option value="turkeys">Thanksgiving: Turkeys 🦃</option>
+      <option value="santas">Christmas: Santas 🎅</option>
+      <option value="none">None (Disabled)</option>
+    </select>
+
+    <label for="intensity-select">Intensity:</label>
+    <select id="intensity-select">
+      <option value="medium" selected>Medium</option>
+      <option value="low">Low (Pi Zero / 3)</option>
+      <option value="high">High (Pi 4/5 / PC)</option>
+    </select>
+
+    <label for="date-picker">Simulate Date:</label>
+    <input type="date" id="date-picker" value="2026-10-02">
+
+    <span class="active-badge" id="active-badge">AUTO: spiderwebs</span>
+    <span class="fps" id="fps">-- fps</span>
+  </div>
+
+  <!-- Load Module Script -->
+  <script>
+    // MagicMirror global shim for standalone browser preview
+    window.Log = {
+      info: console.log,
+      warn: console.warn,
+      error: console.error
+    };
+
+    window.moduleDefinition = null;
+    window.Module = {
+      register: function (name, definition) {
+        window.moduleDefinition = definition;
+      }
+    };
+  </script>
+  <script src="MMM-OverlayEffects.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const container = document.getElementById("module-container");
+      const effectSelect = document.getElementById("effect-select");
+      const intensitySelect = document.getElementById("intensity-select");
+      const datePicker = document.getElementById("date-picker");
+      const activeBadge = document.getElementById("active-badge");
+
+      let instance = null;
+
+      // Default the date picker to today
+      const today = new Date();
+      datePicker.value = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
+
+      function renderModule() {
+        // Stop the previous instance's animation loop, timers and listeners
+        if (instance) instance.destroy();
+        container.innerHTML = "";
+        instance = Object.create(window.moduleDefinition);
+        instance.name = "MMM-OverlayEffects";
+        instance.updateDom = function () {
+          container.replaceChildren(this.getDom());
+        };
+        instance.config = JSON.parse(JSON.stringify(window.moduleDefinition.defaults));
+
+        const selectedEffect = effectSelect.value;
+        const selectedIntensity = intensitySelect.value;
+        const pickedDate = datePicker.value;
+
+        instance.config.intensity = selectedIntensity;
+        if (selectedEffect === "auto") {
+          instance.config.forceEffect = null;
+          instance.config.testDate = pickedDate;
+        } else if (selectedEffect === "none") {
+          instance.config.forceEffect = null;
+          instance.config.testDate = "2026-06-15"; // non-holiday date
+        } else {
+          instance.config.forceEffect = selectedEffect;
+        }
+
+        instance.start();
+        const dom = instance.getDom();
+        container.appendChild(dom);
+
+        const current = instance.currentEffect;
+        activeBadge.textContent = current ? "ACTIVE: " + current : "ACTIVE: none";
+        activeBadge.style.background = current ? "#30d158" : "#8e8e93";
+      }
+
+      effectSelect.addEventListener("change", function () {
+        renderModule();
+      });
+
+      intensitySelect.addEventListener("change", function () {
+        renderModule();
+      });
+
+      datePicker.addEventListener("change", function () {
+        effectSelect.value = "auto";
+        renderModule();
+      });
+
+      // Update mock clock time live
+      setInterval(function () {
+        const now = new Date();
+        const hrs = String(now.getHours()).padStart(2, "0");
+        const mins = String(now.getMinutes()).padStart(2, "0");
+        const secs = String(now.getSeconds()).padStart(2, "0");
+        document.getElementById("mock-time").innerHTML = hrs + ":" + mins + '<span style="font-size: 1.8rem; color: #888;"> ' + secs + '</span>';
+      }, 1000);
+
+      // Frame rate readout
+      const fpsEl = document.getElementById("fps");
+      let frames = 0;
+      let fpsStart = performance.now();
+      (function countFrame(now) {
+        frames++;
+        if (now - fpsStart >= 1000) {
+          fpsEl.textContent = Math.round((frames * 1000) / (now - fpsStart)) + " fps";
+          frames = 0;
+          fpsStart = now;
+        }
+        requestAnimationFrame(countFrame);
+      })(performance.now());
+
+      // Initial render
+      renderModule();
+    });
+  </script>
+</body>
+</html>

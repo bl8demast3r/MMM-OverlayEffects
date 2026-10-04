@@ -1,0 +1,39 @@
+{
+  "name": "mmm-overlayeffects",
+  "version": "1.0.0",
+  "description": "MagicMirror² module for lightweight fullscreen holiday overlays and atmospheric effects (Spider Webs, Snow, Fireworks, Confetti, Hearts, Clovers, Turkeys, Santas).",
+  "main": "MMM-OverlayEffects.js",
+  "scripts": {
+    "test": "node test/test-dates.js"
+  },
+  "keywords": [
+    "magicmirror",
+    "magicmirror2",
+    "module",
+    "overlay",
+    "effects",
+    "holidays",
+    "halloween",
+    "christmas",
+    "thanksgiving",
+    "fireworks",
+    "confetti",
+    "snow",
+    "st-patricks-day",
+    "valentines-day"
+  ],
+  "author": "bl8demast3r",
+  "contributors": [
+    "bl8demast3r",
+    "Claude (Anthropic)"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bl8demast3r/MMM-OverlayEffects/issues"
+  },
+  "homepage": "https://github.com/bl8demast3r/MMM-OverlayEffects#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bl8demast3r/MMM-OverlayEffects.git"
+  }
+}

@@ -21,6 +21,7 @@ It sits in the `fullscreen_above` region and draws effects across the whole mirr
 | **March 17** *(St. Patrick’s Day)* | **Green Clovers** ☘️🍀 | Falling 3-leaf shamrock and 4-leaf clover emojis. |
 | **Thanksgiving** *(4th Thursday in Nov)* | **Turkeys** 🦃 | Falling, wobbling turkey emojis. |
 | **Christmas Eve & Day** *(Dec 24 – 25)* | **Falling Santas** 🎅 | Falling Santa emojis (`🎅`, `🤶`, `🧑‍🎄`) with light background snow. |
+| **April 1** *(April Fools' Day)* | **Mirrored Screen** 🪞 | The entire mirror, every module included, is flipped horizontally for the day. |
 
 > [!NOTE]
 > When no effect is active, the overlay is an empty element and no animation loop runs.
@@ -69,7 +70,7 @@ You don't need to wait for a holiday to see an effect. Force one with `forceEffe
   module: "MMM-OverlayEffects",
   position: "fullscreen_above",
   config: {
-    // "spiderwebs", "snow", "fireworks", "hearts", "confetti", "clovers", "turkeys", "santas"
+    // "spiderwebs", "snow", "fireworks", "hearts", "confetti", "clovers", "turkeys", "santas", "mirrored"
     forceEffect: "spiderwebs"
   }
 }
@@ -93,7 +94,7 @@ An unknown effect name is ignored and logged as a warning in the browser console
 
 | Option | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `forceEffect` | `string \| null` | `null` | Force an effect regardless of date: `"spiderwebs"`, `"snow"`, `"fireworks"`, `"hearts"`, `"confetti"`, `"clovers"`, `"turkeys"`, `"santas"`. Set to `null` for automatic calendar scheduling. |
+| `forceEffect` | `string \| null` | `null` | Force an effect regardless of date: `"spiderwebs"`, `"snow"`, `"fireworks"`, `"hearts"`, `"confetti"`, `"clovers"`, `"turkeys"`, `"santas"`, `"mirrored"`. Set to `null` for automatic calendar scheduling. |
 | `testDate` | `string \| null` | `null` | Simulate a date formatted as `"YYYY-MM-DD"`. |
 | `intensity` | `string` | `"medium"` | Particle count multiplier: `"low"` (0.55x), `"medium"` (1.0x), `"high"` (1.6x). |
 | `checkInterval` | `number` | `600000` | Fallback interval (ms) for re-checking the date. A check also runs automatically just after midnight, so effects switch on time. |

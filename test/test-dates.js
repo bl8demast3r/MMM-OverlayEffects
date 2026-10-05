@@ -84,6 +84,11 @@ const testCases = [
   { date: "2026-03-17", expected: "clovers", desc: "March 17 (St. Patrick's Day Clovers)" },
   { date: "2026-03-18", expected: null, desc: "March 18 (Day after St. Patrick's)" },
 
+  // April Fools' Day = mirrored screen
+  { date: "2026-03-31", expected: null, desc: "March 31 (Day before April Fools')" },
+  { date: "2026-04-01", expected: "mirrored", desc: "April 1 (April Fools' Mirrored Screen)" },
+  { date: "2026-04-02", expected: null, desc: "April 2 (Day after April Fools')" },
+
   // July 1-4 = fireworks
   { date: "2026-06-30", expected: null, desc: "June 30 (Day before Fireworks)" },
   { date: "2026-07-01", expected: "fireworks", desc: "July 1 (Fireworks Day 1)" },

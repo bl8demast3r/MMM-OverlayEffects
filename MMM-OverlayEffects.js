@@ -10,6 +10,7 @@
  * - St. Patrick’s Day (March 17): Falling 3- and 4-leaf green clovers
  * - Thanksgiving: Falling wobbling turkey emojis
  * - Christmas Eve / Day (Dec 24-25): Falling Santas (with optional snow)
+ * - April Fools' Day (April 1): The whole mirror is shown flipped horizontally
  *
  * Author: bl8demast3r
  * Written with AI assistance (Claude by Anthropic)
@@ -22,13 +23,13 @@ const OVERLAY_FRAME_MS = 1000 / 60;
 // Cap a single step (e.g. after a stall) so particles never jump across the screen
 const OVERLAY_MAX_STEP = 4;
 const OVERLAY_TAU = Math.PI * 2;
-const OVERLAY_EFFECTS = ["spiderwebs", "snow", "fireworks", "hearts", "confetti", "clovers", "turkeys", "santas"];
+const OVERLAY_EFFECTS = ["spiderwebs", "snow", "fireworks", "hearts", "confetti", "clovers", "turkeys", "santas", "mirrored"];
 const OVERLAY_EMOJI_FONT = 'px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
 
 Module.register("MMM-OverlayEffects", {
   defaults: {
     // Force a specific effect regardless of date:
-    // "spiderwebs" | "snow" | "fireworks" | "hearts" | "confetti" | "clovers" | "turkeys" | "santas" | null
+    // "spiderwebs" | "snow" | "fireworks" | "hearts" | "confetti" | "clovers" | "turkeys" | "santas" | "mirrored" | null
     forceEffect: null,
 
     // Test a simulated date: "YYYY-MM-DD" or null
@@ -49,7 +50,8 @@ Module.register("MMM-OverlayEffects", {
       confetti: true,
       clovers: true,
       turkeys: true,
-      santas: true
+      santas: true,
+      mirrored: true
     },
 
     // --- October: Spider Webs Settings ---
@@ -224,12 +226,15 @@ Module.register("MMM-OverlayEffects", {
     Log.info(this.name + " suspended.");
     this.suspended = true;
     this.stopAnimation();
+    this.setMirrored(false);
   },
 
   resume: function () {
     Log.info(this.name + " resumed.");
     this.suspended = false;
-    if (this.currentEffect && this.currentEffect !== "spiderwebs") {
+    if (this.currentEffect === "mirrored") {
+      this.setMirrored(true);
+    } else if (this.currentEffect && this.currentEffect !== "spiderwebs") {
       this.startCanvasAnimation();
     }
   },
@@ -237,6 +242,7 @@ Module.register("MMM-OverlayEffects", {
   // Stops all timers and listeners (used by the standalone preview)
   destroy: function () {
     this.stopAnimation();
+    this.setMirrored(false);
     clearInterval(this.checkTimer);
     clearTimeout(this.midnightTimer);
     clearTimeout(this.overrideTimer);
@@ -372,6 +378,11 @@ Module.register("MMM-OverlayEffects", {
       }
     }
 
+    // April Fools' Day (April 1) -> Mirrored screen
+    if (enabled.mirrored && month === 4 && day === 1) {
+      return "mirrored";
+    }
+
     // 3. Month-long atmospheric effects:
     // October -> Spider webs in corner
     if (enabled.spiderwebs && month === 10) {
@@ -394,8 +405,9 @@ Module.register("MMM-OverlayEffects", {
     this.stopAnimation();
     this.canvas = null;
     this.ctx = null;
+    this.setMirrored(this.currentEffect === "mirrored" && !this.suspended);
 
-    if (!this.currentEffect) {
+    if (!this.currentEffect || this.currentEffect === "mirrored") {
       return wrapper; // Empty overlay when no holiday is active
     }
 
@@ -416,6 +428,15 @@ Module.register("MMM-OverlayEffects", {
     }
 
     return wrapper;
+  },
+
+  // -------------------------------------------------------------
+  // MIRRORED EFFECT (April Fools' Day)
+  // -------------------------------------------------------------
+  // Flips the entire page (every module, not just this overlay) horizontally
+  setMirrored: function (on) {
+    if (typeof document === "undefined") return;
+    document.documentElement.classList.toggle("mmm-overlay-mirrored", on);
   },
 
   // -------------------------------------------------------------

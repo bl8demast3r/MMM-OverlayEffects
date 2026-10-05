@@ -128,3 +128,13 @@
     opacity: 1;
   }
 }
+
+/* April Fools' Day: flip the whole mirror horizontally. Applied to <html> so
+   every module is mirrored; the explicit viewport size keeps fixed-position
+   regions (e.g. fullscreen_above) laid out exactly as without the transform. */
+html.mmm-overlay-mirrored {
+  width: 100vw;
+  height: 100vh;
+  transform: scaleX(-1);
+  transform-origin: center;
+}

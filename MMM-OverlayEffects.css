@@ -115,6 +115,41 @@
   }
 }
 
+/* Spider crawling across the screen (size set from crawlerSize, position and
+   heading set from JS each frame) */
+.mmm-overlay-root .mmm-crawler {
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  pointer-events: none;
+  will-change: transform;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.2));
+}
+
+/* The two alternating leg sets swing out of phase while walking */
+.mmm-overlay-root .mmm-crawler path {
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+.mmm-overlay-root .mmm-crawler-walking .mmm-crawler-legs-a {
+  animation: mmm-crawler-step 0.22s ease-in-out infinite alternate;
+}
+
+.mmm-overlay-root .mmm-crawler-walking .mmm-crawler-legs-b {
+  animation: mmm-crawler-step 0.22s ease-in-out -0.22s infinite alternate-reverse;
+}
+
+@keyframes mmm-crawler-step {
+  from {
+    transform: rotate(-9deg);
+  }
+  to {
+    transform: rotate(9deg);
+  }
+}
+
 /* Fade animation when effect is loaded */
 .mmm-overlay-fade-in {
   animation: mmm-fade-in 1.2s ease-in forwards;

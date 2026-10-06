@@ -2,7 +2,8 @@
  * MagicMirror² Module: MMM-OverlayEffects
  *
  * Fullscreen atmospheric and holiday overlay effects:
- * - October: Spider webs in corners with hanging spider
+ * - October: Spider webs in corners with hanging spider, plus a spider that
+ *   crawls across the screen every so often
  * - December: Realistic gentle snowfall
  * - July 1-4: Spectacular fireworks
  * - Feb 14: Floating hearts and heart-eyes emojis
@@ -60,7 +61,13 @@ Module.register("MMM-OverlayEffects", {
       showSpider: true,
       spiderCorner: "top-right", // "top-left" or "top-right"
       webColor: "rgba(255, 255, 255, 0.45)",
-      webSize: 320
+      webSize: 320,
+      // A spider that wanders across the screen from one edge to the opposite one
+      crawlingSpider: true,
+      crawlDelayMin: 20000, // ms between crawls (random within this range)
+      crawlDelayMax: 60000,
+      crawlSpeed: 1.8, // px per frame while moving
+      crawlerSize: 44 // px
     },
 
     // --- December: Snow Settings ---
@@ -171,6 +178,9 @@ Module.register("MMM-OverlayEffects", {
     this.lastFrameTime = null;
     this.canvas = null;
     this.ctx = null;
+    this.crawlerEl = null;
+    this.crawler = null;
+    this.crawlTimer = null;
     this.particles = [];
     this.secondaryParticles = [];
     this.rockets = [];
@@ -234,6 +244,8 @@ Module.register("MMM-OverlayEffects", {
     this.suspended = false;
     if (this.currentEffect === "mirrored") {
       this.setMirrored(true);
+    } else if (this.currentEffect === "spiderwebs") {
+      this.scheduleCrawl(true);
     } else if (this.currentEffect && this.currentEffect !== "spiderwebs") {
       this.startCanvasAnimation();
     }
@@ -405,6 +417,7 @@ Module.register("MMM-OverlayEffects", {
     this.stopAnimation();
     this.canvas = null;
     this.ctx = null;
+    this.crawlerEl = null;
     this.setMirrored(this.currentEffect === "mirrored" && !this.suspended);
 
     if (!this.currentEffect || this.currentEffect === "mirrored") {
@@ -413,6 +426,9 @@ Module.register("MMM-OverlayEffects", {
 
     if (this.currentEffect === "spiderwebs") {
       this.buildSpiderWebsDom(wrapper);
+      if (!this.suspended) {
+        this.scheduleCrawl(true);
+      }
     } else {
       this.canvas = document.createElement("canvas");
       this.canvas.className = "mmm-overlay-canvas";
@@ -487,8 +503,10 @@ Module.register("MMM-OverlayEffects", {
 
   generateSpiderSvg: function () {
     return (
-      '<svg viewBox="0 0 60 160" width="60" height="160" xmlns="http://www.w3.org/2000/svg">' +
-      '  <line x1="30" y1="0" x2="30" y2="108" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" />' +
+      // The thread starts well above the top of the box (drawn with overflow
+      // visible) so its end never shows when the spider bobs downward
+      '<svg viewBox="0 0 60 160" width="60" height="160" overflow="visible" xmlns="http://www.w3.org/2000/svg">' +
+      '  <line x1="30" y1="-100" x2="30" y2="108" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" />' +
       '  <path d="M30,116 Q18,102 6,112 M30,120 Q14,115 4,126 M30,124 Q14,128 8,142 M30,126 Q20,138 12,150" stroke="#777" stroke-width="1.4" fill="none" stroke-linecap="round" />' +
       '  <path d="M30,116 Q42,102 54,112 M30,120 Q46,115 56,126 M30,124 Q46,128 52,142 M30,126 Q40,138 48,150" stroke="#777" stroke-width="1.4" fill="none" stroke-linecap="round" />' +
       '  <ellipse cx="30" cy="132" rx="9" ry="12" fill="#222" stroke="#555" stroke-width="1" />' +
@@ -532,6 +550,178 @@ Module.register("MMM-OverlayEffects", {
       spiderDiv.appendChild(bobber);
       wrapper.appendChild(spiderDiv);
     }
+
+    if (cfg.crawlingSpider) {
+      const crawlerSize = cfg.crawlerSize || 44;
+      const crawler = document.createElement("div");
+      crawler.className = "mmm-crawler";
+      crawler.style.width = crawlerSize + "px";
+      crawler.style.height = crawlerSize + "px";
+      crawler.innerHTML = this.generateCrawlerSvg();
+      wrapper.appendChild(crawler);
+      this.crawlerEl = crawler;
+    }
+  },
+
+  // Top-down spider facing +x; legs are split into the two alternating sets of
+  // a real spider's gait so CSS can swing them out of phase
+  generateCrawlerSvg: function () {
+    const legs = [
+      [5, 3, 14, 12, 25, 9],
+      [4, 4, 10, 14, 16, 22],
+      [2, 4, -2, 15, -6, 23],
+      [1, 3, -8, 12, -21, 18]
+    ];
+    const sets = ["", ""];
+    for (let i = 0; i < legs.length; i++) {
+      const l = legs[i];
+      for (let side = -1; side <= 1; side += 2) {
+        const d = "M" + l[0] + "," + side * l[1] + " L" + l[2] + "," + side * l[3] + " L" + l[4] + "," + side * l[5] + " ";
+        sets[(i + (side > 0 ? 1 : 0)) % 2] += d;
+      }
+    }
+    return (
+      '<svg viewBox="-30 -30 60 60" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">' +
+      '<g stroke="#777" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path class="mmm-crawler-legs-a" d="' + sets[0] + '" />' +
+      '<path class="mmm-crawler-legs-b" d="' + sets[1] + '" />' +
+      "</g>" +
+      '<ellipse cx="-9" cy="0" rx="11" ry="8" fill="#222" stroke="#555" stroke-width="1" />' +
+      '<ellipse cx="-10" cy="0" rx="5" ry="2.5" fill="#444" opacity="0.5" />' +
+      '<ellipse cx="5" cy="0" rx="6" ry="5" fill="#181818" stroke="#555" stroke-width="0.9" />' +
+      '<circle cx="10" cy="-1.6" r="1.1" fill="#ff3333" />' +
+      '<circle cx="10" cy="1.6" r="1.1" fill="#ff3333" />' +
+      "</svg>"
+    );
+  },
+
+  // Waits a random delay, then sends the spider across the screen. The render
+  // loop only runs during a crawl, so the idle time between crawls costs nothing.
+  scheduleCrawl: function (first) {
+    if (!this.crawlerEl) return;
+    clearTimeout(this.crawlTimer);
+    this.crawlerEl.style.visibility = "hidden";
+    const cfg = this.config.spiderwebs;
+    const delay = first ? this.randomRange(3000, 10000) : this.randomRange(cfg.crawlDelayMin, cfg.crawlDelayMax);
+    const self = this;
+    this.crawlTimer = setTimeout(function () {
+      self.crawlTimer = null;
+      self.startCrawl();
+    }, delay);
+  },
+
+  startCrawl: function () {
+    if (!this.crawlerEl || this.suspended) return;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const margin = this.config.spiderwebs.crawlerSize || 44;
+    const self = this;
+    const along = function (len) {
+      return self.randomRange(len * 0.1, len * 0.9);
+    };
+
+    // Enter just off a random edge and head for a random point off the opposite one
+    // (ax, ay) is the direction across the screen, used to detect the exit
+    let x, y, tx, ty, ax, ay;
+    const side = Math.floor(Math.random() * 4);
+    if (side === 0) {
+      x = -margin; y = along(h); tx = w + margin; ty = along(h); ax = 1; ay = 0;
+    } else if (side === 1) {
+      x = w + margin; y = along(h); tx = -margin; ty = along(h); ax = -1; ay = 0;
+    } else if (side === 2) {
+      x = along(w); y = -margin; tx = along(w); ty = h + margin; ax = 0; ay = 1;
+    } else {
+      x = along(w); y = h + margin; tx = along(w); ty = -margin; ax = 0; ay = -1;
+    }
+
+    this.crawler = {
+      x: x,
+      y: y,
+      tx: tx,
+      ty: ty,
+      ax: ax,
+      ay: ay,
+      heading: Math.atan2(ty - y, tx - x),
+      wander: 0, // offset (radians) from the bearing to the target
+      speed: this.newCrawlSpeed(),
+      pause: 0,
+      nextPause: this.randomRange(60, 240),
+      half: margin / 2,
+      w: w,
+      h: h,
+      entered: false
+    };
+    this.crawlerEl.style.visibility = "visible";
+    this.setCrawlerWalking(true);
+    this.positionCrawler();
+    this.startRenderLoop(function (step) {
+      self.updateCrawler(step);
+    });
+  },
+
+  newCrawlSpeed: function () {
+    return this.config.spiderwebs.crawlSpeed * this.randomRange(0.6, 1.4);
+  },
+
+  setCrawlerWalking: function (walking) {
+    this.crawlerEl.classList.toggle("mmm-crawler-walking", walking);
+  },
+
+  positionCrawler: function () {
+    const c = this.crawler;
+    this.crawlerEl.style.transform =
+      "translate3d(" + (c.x - c.half).toFixed(1) + "px," + (c.y - c.half).toFixed(1) + "px,0) rotate(" + c.heading.toFixed(3) + "rad)";
+  },
+
+  updateCrawler: function (step) {
+    const c = this.crawler;
+
+    // Spiders move in bursts: stop now and then, then dart off at a new speed
+    if (c.pause > 0) {
+      c.pause -= step;
+      if (c.pause <= 0) {
+        c.speed = this.newCrawlSpeed();
+        this.setCrawlerWalking(true);
+      }
+      return;
+    }
+    c.nextPause -= step;
+    if (c.nextPause <= 0) {
+      c.pause = this.randomRange(20, 110);
+      c.nextPause = this.randomRange(60, 300);
+      // Often pick a new direction while stopped
+      if (Math.random() < 0.5) {
+        c.wander = this.randomRange(-0.9, 0.9);
+      }
+      this.setCrawlerWalking(false);
+      return;
+    }
+
+    // Random walk on the heading offset; capped well below 90 degrees so the
+    // spider always keeps making progress toward the far edge
+    c.wander = Math.min(Math.max(c.wander + (Math.random() - 0.5) * 0.15 * step, -0.9), 0.9);
+    // Once it has wandered off a side edge, head straight back toward the target
+    if (c.entered && (c.x < 0 || c.x > c.w || c.y < 0 || c.y > c.h)) {
+      c.wander *= Math.pow(0.85, step);
+    } else if (!c.entered && c.x >= 0 && c.x <= c.w && c.y >= 0 && c.y <= c.h) {
+      c.entered = true;
+    }
+    const dx = c.tx - c.x;
+    const dy = c.ty - c.y;
+    let turn = Math.atan2(dy, dx) + c.wander - c.heading;
+    turn = Math.atan2(Math.sin(turn), Math.cos(turn)); // normalize to [-PI, PI]
+    c.heading += turn * Math.min(1, 0.08 * step);
+
+    const move = c.speed * step;
+    c.x += Math.cos(c.heading) * move;
+    c.y += Math.sin(c.heading) * move;
+    this.positionCrawler();
+
+    // Done once it has crossed the far edge and is fully out of sight
+    if ((c.x - c.tx) * c.ax + (c.y - c.ty) * c.ay >= 0) {
+      this.stopAnimation();
+      this.scheduleCrawl(false);
+    }
   },
 
   // -------------------------------------------------------------
@@ -543,6 +733,9 @@ Module.register("MMM-OverlayEffects", {
       cancelAnimationFrame(this.rafId);
       this.rafId = null;
     }
+    clearTimeout(this.crawlTimer);
+    this.crawlTimer = null;
+    this.crawler = null;
     this.particles = [];
     this.secondaryParticles = [];
     this.rockets = [];
@@ -553,12 +746,9 @@ Module.register("MMM-OverlayEffects", {
   startCanvasAnimation: function () {
     if (!this.canvas || !this.ctx) return;
     this.stopAnimation();
-    this.animationRunning = true;
-    this.lastFrameTime = null;
 
     const w = this.canvas.width;
     const h = this.canvas.height;
-    const self = this;
 
     if (this.currentEffect === "snow") {
       this.initSnow(w, h);
@@ -572,6 +762,17 @@ Module.register("MMM-OverlayEffects", {
       this.initSantas(w, h);
     }
 
+    const self = this;
+    this.startRenderLoop(function (step) {
+      self.updateAndRender(step);
+    });
+  },
+
+  // Calls onFrame(step) every animation frame until stopAnimation()
+  startRenderLoop: function (onFrame) {
+    this.animationRunning = true;
+    this.lastFrameTime = null;
+    const self = this;
     function renderLoop(now) {
       if (!self.animationRunning) return;
       // Frame step in units of 60 fps frames
@@ -580,8 +781,11 @@ Module.register("MMM-OverlayEffects", {
         step = Math.min(Math.max((now - self.lastFrameTime) / OVERLAY_FRAME_MS, 0), OVERLAY_MAX_STEP);
       }
       self.lastFrameTime = now;
-      self.updateAndRender(step);
-      self.rafId = requestAnimationFrame(renderLoop);
+      onFrame(step);
+      // onFrame may have stopped the loop (e.g. a finished crawl)
+      if (self.animationRunning) {
+        self.rafId = requestAnimationFrame(renderLoop);
+      }
     }
     this.rafId = requestAnimationFrame(renderLoop);
   },

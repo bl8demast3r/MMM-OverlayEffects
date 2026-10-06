@@ -13,7 +13,7 @@ It sits in the `fullscreen_above` region and draws effects across the whole mirr
 
 | Date / Range | Effect | Visual Description |
 | :--- | :--- | :--- |
-| **October** *(All month)* | **Spider Webs** 🕸️ | SVG spider webs in the screen corners with a spider swinging on a silk thread. |
+| **October** *(All month)* | **Spider Webs** 🕸️ | SVG spider webs in the screen corners with a spider swinging on a silk thread, plus a spider that scuttles across the screen every so often along a random, wandering path. |
 | **December** *(Dec 1–23, 26–30)* | **Snow** ❄️ | Snowflakes of varied size and opacity drifting and swaying down the screen. |
 | **July 1 – 4** | **Fireworks** 🎆 | Rockets launching upwards and bursting into multi-colored sparks. |
 | **February 14** *(Valentine's)* | **Hearts & Emojis** 😍 | Hearts and heart-eyes emojis (`❤️`, `💖`, `💕`, `💓`, `😍`, `🥰`, `💘`) floating upwards. |
@@ -113,7 +113,12 @@ config: {
     showSpider: true,                    // hanging swinging spider
     spiderCorner: "top-right",           // "top-left" or "top-right"
     webColor: "rgba(255, 255, 255, 0.45)",
-    webSize: 320                         // web size in px (capped at 40% of the screen)
+    webSize: 320,                        // web size in px (capped at 40% of the screen)
+    crawlingSpider: true,                // spider crawling from one edge to the opposite one
+    crawlDelayMin: 20000,                // ms between crawls (random within this range)
+    crawlDelayMax: 60000,
+    crawlSpeed: 1.8,                     // px per frame while moving
+    crawlerSize: 44                      // crawling spider size in px
   },
 
   // December: Snow

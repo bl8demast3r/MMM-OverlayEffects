@@ -9,7 +9,19 @@ It sits in the `fullscreen_above` region and draws effects across the whole mirr
 
 ---
 
-## ✨ Holiday Schedule & Effects
+## Screenshots
+
+| October: Spider Webs | December: Snow | July 1–4: Fireworks |
+| :---: | :---: | :---: |
+| ![Spider webs effect](screenshots/spiderwebs.png) | ![Snow effect](screenshots/snow.png) | ![Fireworks effect](screenshots/fireworks.png) |
+| **February 14: Hearts** | **New Year: Confetti** | **St. Patrick's Day: Clovers** |
+| ![Hearts effect](screenshots/hearts.png) | ![Confetti effect](screenshots/confetti.png) | ![Clovers effect](screenshots/clovers.png) |
+| **Thanksgiving: Turkeys** | **Christmas: Santas** | **April Fools: Mirrored Screen** |
+| ![Turkeys effect](screenshots/turkeys.png) | ![Santas effect](screenshots/santas.png) | ![Mirrored screen effect](screenshots/mirrored.png) |
+
+---
+
+## Holiday Schedule & Effects
 
 | Date / Range | Effect | Visual Description |
 | :--- | :--- | :--- |
@@ -28,7 +40,7 @@ It sits in the `fullscreen_above` region and draws effects across the whole mirr
 
 ---
 
-## 🚀 Installation
+## Installation
 
 Navigate to your MagicMirror's `modules` folder and clone this repository:
 
@@ -48,7 +60,7 @@ git pull
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 Add the module to your `config/config.js` file at `position: "fullscreen_above"`:
 
@@ -59,7 +71,7 @@ Add the module to your `config/config.js` file at `position: "fullscreen_above"`
   config: {
     intensity: "medium" // "low", "medium", or "high"
   }
-}
+},
 ```
 
 ### Testing & Previewing Effects
@@ -73,7 +85,7 @@ You don't need to wait for a holiday to see an effect. Force one with `forceEffe
     // "spiderwebs", "snow", "fireworks", "hearts", "confetti", "clovers", "turkeys", "santas", "mirrored"
     forceEffect: "spiderwebs"
   }
-}
+},
 ```
 
 ```javascript
@@ -83,14 +95,14 @@ You don't need to wait for a holiday to see an effect. Force one with `forceEffe
   config: {
     testDate: "2026-10-31" // October 31 (Halloween)
   }
-}
+},
 ```
 
 An unknown effect name is ignored and logged as a warning in the browser console.
 
 ---
 
-## 🎛️ Configuration Options
+## Configuration Options
 
 | Option | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
@@ -197,7 +209,7 @@ Speeds are in pixels per 1/60th of a second, so effects move at the same speed o
 
 ---
 
-## 🎂 Custom Holidays & Anniversaries
+## Custom Holidays & Anniversaries
 
 Define your own events with `customSchedules`. Use `day` for a single day, or `startDay`/`endDay` for a range within one month. Custom schedules take priority over the built-in holidays.
 
@@ -223,7 +235,7 @@ config: {
 
 ---
 
-## 📡 MagicMirror Notifications
+## MagicMirror Notifications
 
 Control the overlay from other modules, e.g. `MMM-Remote-Control`, voice assistants, or motion sensors:
 
@@ -245,13 +257,13 @@ Control the overlay from other modules, e.g. `MMM-Remote-Control`, voice assista
 
 ---
 
-## 🖥️ Standalone Preview
+## Standalone Preview
 
 Open `preview.html` in any modern browser (double-click it, or `firefox preview.html`). It shows a mock mirror with a control bar for choosing an effect, an intensity, or a simulated date, plus a live frame-rate readout. No server is needed.
 
 ---
 
-## ⚡ Performance
+## Performance
 
 - **No input blocking**: The overlay uses `pointer-events: none`, so touches and clicks pass through to the modules underneath.
 - **Single canvas, one animation loop**: Particle effects draw to one fullscreen 2D canvas using `requestAnimationFrame`.
@@ -263,13 +275,27 @@ Open `preview.html` in any modern browser (double-click it, or `firefox preview.
 
 ---
 
-## 👥 Contributors
+## Development
+
+Install the dev dependencies, then lint and test:
+
+```bash
+npm install
+npm run lint
+npm test
+```
+
+See [CHANGELOG.md](CHANGELOG.md) for the release history.
+
+---
+
+## Contributors
 
 - **bl8demast3r** - Creator & Maintainer
 - **Claude** (Anthropic) - AI code review, bug fixes & performance optimization
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

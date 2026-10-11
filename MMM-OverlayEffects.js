@@ -494,7 +494,9 @@ Module.register("MMM-OverlayEffects", {
     }
 
     return (
-      '<svg viewBox="0 0 ' + size + " " + size + '" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">' +
+      // Anchored to the corner (xMinYMin) so the web still reaches the screen
+      // edges when the 40vw/40vh cap makes its box non-square
+      '<svg viewBox="0 0 ' + size + " " + size + '" width="100%" height="100%" preserveAspectRatio="xMinYMin meet" xmlns="http://www.w3.org/2000/svg">' +
       '<path d="' + spokes + '" stroke="' + color + '" stroke-width="1.3" fill="none" opacity="0.85" />' +
       '<path d="' + curves + '" stroke="' + color + '" stroke-width="1.1" fill="none" opacity="0.75" />' +
       "</svg>"

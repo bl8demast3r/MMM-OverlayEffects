@@ -281,8 +281,8 @@ Install the dev dependencies, then lint and test:
 
 ```bash
 npm install
-npm run lint
-npm test
+node --run lint
+node --run test
 ```
 
 See [CHANGELOG.md](CHANGELOG.md) for the release history.

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "MagicMirror² module for lightweight fullscreen holiday overlays and atmospheric effects (Spider Webs, Snow, Fireworks, Confetti, Hearts, Clovers, Turkeys, Santas).",
   "main": "MMM-OverlayEffects.js",
+  "type": "commonjs",
   "scripts": {
     "lint": "eslint",
     "lint:fix": "eslint --fix",
@@ -26,8 +27,14 @@
   ],
   "author": "bl8demast3r",
   "contributors": [
-    "bl8demast3r",
-    "Claude (Anthropic)"
+    {
+      "name": "bl8demast3r",
+      "url": "https://github.com/bl8demast3r"
+    },
+    {
+      "name": "Claude (Anthropic)",
+      "url": "https://www.anthropic.com/claude"
+    }
   ],
   "license": "MIT",
   "bugs": {
@@ -42,6 +49,7 @@
     "@eslint/css": "^2.0.0",
     "@eslint/js": "^10.0.1",
     "eslint": "^10.12.0",
+    "eslint-plugin-package-json": "^0.91.2",
     "globals": "^17.13.0"
   }
 }

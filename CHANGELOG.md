@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - April Fools' Day mirrored screen effect: on April 1 the whole mirror is flipped horizontally (`forceEffect: "mirrored"`, `enabledEffects.mirrored`).
 - Crawling spider for the October effect: a spider crawls across the screen every 20–60 s along a random, wandering path. New `spiderwebs` options: `crawlingSpider`, `crawlDelayMin`, `crawlDelayMax`, `crawlSpeed`, `crawlerSize`.
 - Screenshots in the README.
-- ESLint configuration with `npm run lint` and `npm run lint:fix` scripts.
+- ESLint configuration (including the module checker's package.json rules) with `lint` and `lint:fix` scripts.
 - Dependabot configuration, CHANGELOG and CODE_OF_CONDUCT.
 
 ### Fixed

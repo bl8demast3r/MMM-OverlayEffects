@@ -2,6 +2,7 @@ import css from "@eslint/css";
 import { defineConfig } from "eslint/config";
 import globals from "globals";
 import js from "@eslint/js";
+import packageJson from "eslint-plugin-package-json";
 
 export default defineConfig([
   {
@@ -43,5 +44,18 @@ export default defineConfig([
     languageOptions: { ecmaVersion: "latest", sourceType: "module" },
     plugins: { js },
     extends: ["js/recommended"]
+  },
+  {
+    // Same package.json rules as the MagicMirror 3rd-party module checker
+    files: ["package.json"],
+    plugins: { packageJson },
+    extends: ["packageJson/recommended"],
+    rules: {
+      "package-json/require-type": "error",
+      "package-json/order-properties": "off",
+      "package-json/require-exports": "off",
+      "package-json/require-files": "off",
+      "package-json/require-sideEffects": "off"
+    }
   }
 ]);
